@@ -7,6 +7,8 @@ public class PlayerMovement : MonoBehaviour
     [SerializeField] private float groundAcceleration = 20f;
     [SerializeField] private float groundDeceleration = 25f;
     [SerializeField] private float airAcceleration = 5f;
+    [SerializeField] private float maxMomentumSpeed = 14f;
+    [SerializeField] private float momentumDecay = 1.5f;
     [SerializeField] private float gravity = -20f;
     [SerializeField] private float jumpHeight = 2f;
     private Vector2 moveInput;
@@ -53,29 +55,59 @@ public class PlayerMovement : MonoBehaviour
             );
         Vector3 desiredVelocity = moveDirection * moveSpeed;
         bool hasMovementInput = moveInput.sqrMagnitude > 0.01f;
+    
     if(controller.isGrounded){
         if (hasMovementInput)
             {
-                horizontalVelocity = Vector3.MoveTowards(
-                    horizontalVelocity,
-                    desiredVelocity,
-                    groundAcceleration * Time.deltaTime
-                );
+                float currentSpeed = horizontalVelocity.magnitude;
+                if (currentSpeed <= moveSpeed)
+                {
+                    horizontalVelocity = Vector3.MoveTowards(
+                        horizontalVelocity,
+                        desiredVelocity,
+                        groundAcceleration * Time.deltaTime
+                    );
+                }
+                else
+                {
+                    Vector3 momentumTarget = moveDirection * currentSpeed; 
+                    
+                    horizontalVelocity = Vector3.MoveTowards(
+                        horizontalVelocity,
+                        momentumTarget,
+                        groundAcceleration * Time.deltaTime
+                    );
+                
+                if(horizontalVelocity.magnitude > moveSpeed)
+                {
+                    float decayedSpeed = Mathf.MoveTowards(
+                        horizontalVelocity.magnitude,
+                        moveSpeed,
+                        momentumDecay * Time.deltaTime
+                    );
+                    horizontalVelocity = horizontalVelocity.normalized * decayedSpeed;
+                }
+                }
             }
             else
             {
                 horizontalVelocity = Vector3.MoveTowards(
-                horizontalVelocity,
-                Vector3.zero,
-                groundDeceleration * Time.deltaTime
+                    horizontalVelocity,
+                    Vector3.zero,
+                    groundDeceleration * Time.deltaTime
                 );
             }  
        }
-       else
+       else if (hasMovementInput)
         {
+            float currentSpeed = horizontalVelocity.magnitude;
+
+            Vector3 targetVelocity =
+                moveDirection * Mathf.Max(currentSpeed, moveSpeed);
+
             horizontalVelocity = Vector3.MoveTowards(
                 horizontalVelocity,
-                desiredVelocity,
+                targetVelocity,
                 airAcceleration * Time.deltaTime
             );
         }

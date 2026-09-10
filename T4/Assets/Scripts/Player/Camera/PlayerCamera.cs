@@ -12,6 +12,13 @@ public class PlayerCamera : MonoBehaviour
     private float yaw;
     private float pitch;
 
+
+      // 1. Añadimos el método Start para bloquear el cursor al iniciar
+    void Start()
+    {
+        Cursor.lockState = CursorLockMode.Locked; // Bloquea el cursor en el centro de la pantalla
+        Cursor.visible = false;                   // Oculta el cursor para que no estorbe
+    }
     public void Onlook(InputAction.CallbackContext context)
     {
         lookInput = context.ReadValue<Vector2>();
