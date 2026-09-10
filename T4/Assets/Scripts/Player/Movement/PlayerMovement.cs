@@ -3,11 +3,12 @@ using UnityEngine.InputSystem;
 public class PlayerMovement : MonoBehaviour
 {      
     [SerializeField] private Transform cameraTransform;
+    [SerializeField] private float rotationSpeed = 720f;
     [SerializeField] private float moveSpeed = 5f;
     [SerializeField] private float groundAcceleration = 20f;
     [SerializeField] private float groundDeceleration = 25f;
     [SerializeField] private float airAcceleration = 5f;
-    [SerializeField] private float maxMomentumSpeed = 14f;
+   // [SerializeField] private float maxMomentumSpeed = 14f;
     [SerializeField] private float momentumDecay = 1.5f;
     [SerializeField] private float gravity = -20f;
     [SerializeField] private float jumpHeight = 2f;
@@ -45,6 +46,14 @@ public class PlayerMovement : MonoBehaviour
         forward.Normalize();
         right.Normalize();
 
+        Quaternion targetRotation = Quaternion.LookRotation(forward);
+
+        transform.rotation = Quaternion.RotateTowards(
+         transform.rotation,
+            targetRotation,
+            rotationSpeed * Time.deltaTime
+        );
+
         Vector3 moveDirection =
         forward * moveInput.y +
         right * moveInput.x;
@@ -56,6 +65,8 @@ public class PlayerMovement : MonoBehaviour
         Vector3 desiredVelocity = moveDirection * moveSpeed;
         bool hasMovementInput = moveInput.sqrMagnitude > 0.01f;
     
+    
+
     if(controller.isGrounded){
         if (hasMovementInput)
             {
